@@ -1,5 +1,6 @@
 import logging
 import os
+import requests
 
 
 def download_images(url, folder_name, image_name):

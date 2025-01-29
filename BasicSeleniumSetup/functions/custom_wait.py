@@ -1,8 +1,7 @@
 import time
-from selenium import webdriver
 import logging
-
-from selenium.common import TimeoutException
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
 
 
 def custom_wait(driver, condition_function, timeout=10, poll_frequency=0.5):
@@ -16,4 +15,4 @@ def custom_wait(driver, condition_function, timeout=10, poll_frequency=0.5):
         time.sleep(poll_frequency)
         if time.time() > end_time:
             break
-        return False
+    return False
