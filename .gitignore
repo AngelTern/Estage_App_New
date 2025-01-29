@@ -1,6 +1,15 @@
+# Ignore environment and sensitive config files
 *.env
 *.json
+!important-config.json  # (Unignore specific JSON file if needed)
+
+# Ignore dataset files
 *.xlsx
 *.xls
 *.csv
+
+# Ignore log files
 *.log
+
+# Ignore images (if intended)
+*.jpg
