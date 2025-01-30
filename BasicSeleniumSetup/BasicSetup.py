@@ -6,21 +6,15 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException
+from BasicSeleniumSetup.BasicVariables import BasicVariables
 import logging
 
 
-class BasicScraper:
+class BasicScraper(BasicVariables):
     def __init__(self, url, headless=True, log_file="scraper.log"):
+        super().__init__()
         self.url = url
         self.headless = headless
-        self.ad_id = None
-        self.ad_title = None
-        self.location = None
-        self.number = None
-        self.images = []
-        self.owner_price = None
-        self.owner_price_currency = None
-        self.owner_number = None
 
         log_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "logs"))
         os.makedirs(log_dir, exist_ok=True)
