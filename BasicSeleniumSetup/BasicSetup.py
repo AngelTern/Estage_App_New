@@ -58,22 +58,18 @@ class BasicScraper(BasicVariables):
                 self.logger.error(f"Error closing the browser: {e}")
 
     def save_directory(self):
-        """Create a directory for the ad ID and an images folder."""
         if not self.ad_id:
             self.logger.error("Cannot create directory: ad_id is None.")
             return
 
-        # Construct the path to the sibling 'data' folder
         base_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "..", "data")
         )
         directory_path = os.path.join(base_path, self.ad_id)
 
-        # Create the directory for the ad ID
         os.makedirs(directory_path, exist_ok=True)
         self.logger.info(f"Directory created: {directory_path}")
 
-        # Create an images folder inside the directory
         images_folder_path = os.path.join(directory_path, "images")
         os.makedirs(images_folder_path, exist_ok=True)
         self.logger.info(f"Images folder created: {images_folder_path}")
@@ -82,3 +78,6 @@ class BasicScraper(BasicVariables):
             "directory_path": directory_path,
             "images_folder_path": images_folder_path,
         }
+
+    def save_to_excel(self):
+        pass

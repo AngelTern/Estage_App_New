@@ -17,3 +17,12 @@ class BasicVariables:
         self.bedroom = None
         self.floor = None
         self.total_floor = None
+        self.agency_price = None
+        self.transaction_type = None
+        self.property_type = None
+        self.category = "უძრავი ქონება"
+        self.district = None
+        self.comment = None
+        self.paths = {}
+
+

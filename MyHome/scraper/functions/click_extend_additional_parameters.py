@@ -9,10 +9,10 @@ from BasicSeleniumSetup.functions.click_element import click_element
 import re
 
 
-def click_owner_number_button(scraper, by, value):
+def click_extend_additional_parameters(scraper, by, value):
     if not is_loaded(scraper, by, value):
-        scraper.logger.error(f"Owner number button element not loaded: {by} - {value}")
-        return None
+        scraper.logger.warning(f"Extend additional parameters button element not loaded: {by} - {value}")
+        return False
 
     try:
         if click_element(scraper, by, value):
@@ -20,5 +20,5 @@ def click_owner_number_button(scraper, by, value):
             return True
         return False
     except WebDriverException as e:
-        scraper.logger.error(f"WebDriver exception occurred while clicking owner price button: {e}")
-        return None
+        scraper.logger.error(f"WebDriver exception occurred while clicking extend additional parameters button: {e}")
+        return False
