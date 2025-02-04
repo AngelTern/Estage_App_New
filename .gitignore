@@ -11,5 +11,9 @@
 # Ignore log files
 *.log
 
-# Ignore images (if intended)
+# Ignore images
 *.jpg
+
+# Ignore Confidential data folder
+
+confidential/

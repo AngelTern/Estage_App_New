@@ -3,6 +3,7 @@ class BasicVariables:
         self.url = None
         self.headless = None
         self.ad_id = None
+        self.city = None
         self.ad_title = None
         self.location = None
         self.number = None
@@ -24,5 +25,3 @@ class BasicVariables:
         self.district = None
         self.comment = None
         self.paths = {}
-
-

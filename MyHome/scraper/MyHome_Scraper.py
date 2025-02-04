@@ -36,7 +36,8 @@ class MyHomeScraper(BasicScraper):
         self.comment = comment
 
         (self.ad_title, self.transaction_type, self.property_type,
-         self.district) = get_ad_title(self, By.CSS_SELECTOR, MyHomeScrapeSelectors.AD_TITLE)
+         self.district, self.city) = get_ad_title(self, By.CSS_SELECTOR, MyHomeScrapeSelectors.AD_TITLE,
+                                                  MyHomeScrapeSelectors.SCRIPT_INNER_DATA)
 
         self.location, self.number = get_location(self, By.CSS_SELECTOR, MyHomeScrapeSelectors.LOCATION)
 
@@ -118,6 +119,7 @@ class MyHomeScraper(BasicScraper):
             "category": self.category,
             "property_type": self.property_type,
             "transaction_type": self.transaction_type,
+            "ქალაქი": self.city,
             "რაიონი": self.district
         }
 
@@ -154,6 +156,7 @@ class MyHomeScraper(BasicScraper):
             "number": self.number,
             "images": self.images,
             "owner_price": self.owner_price,
+            "currency": self.owner_price_currency,
             "agency_price": self.agency_price,
             "phone_number": self.owner_number,
             "name": self.owner_name,

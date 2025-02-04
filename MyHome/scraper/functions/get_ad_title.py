@@ -4,12 +4,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, WebDriverException
 from BasicSeleniumSetup.functions.is_loaded import is_loaded
 import re
+import json
 
 transaction_types = ["იყიდება", "ქირავდება", "გირავდება", "ქირავდება დღიურად"]
 property_types = ["ბინა", "კერძო სახლი", "აგარაკი", "მიწის ნაკვეთი", "კომერციული ფართი", "სასტუმრო"]
 
 
-def get_ad_title(scraper, by, value):
+def get_ad_title(scraper, by, value, value_script):
     scraper.logger.info("Entering get_ad_title")
     if not is_loaded(scraper, by, value):
         scraper.logger.warning("Ad Title element not loaded: %s - %s", by, value)
@@ -46,22 +47,25 @@ def get_ad_title(scraper, by, value):
         transaction_type_result = found_transaction_types[0] if found_transaction_types else None
         property_type_result = found_property_types[0] if found_property_types else None
         district_result = None
+        city_result = None
 
-        if property_type_result:
-            idx = ad_title.find(property_type_result)
+        script_inner_data_element = scraper.driver.find_element(by, value_script)
+        if script_inner_data_element:
+            script_inner_data = script_inner_data_element.get_attribute("innerHTML")
+            script_inner_data_json = json.loads(script_inner_data)
+            district_result = \
+                script_inner_data_json["props"]["pageProps"]["dehydratedState"]["queries"][0]["state"]["data"]["data"][
+                    "statement"]["urban_name"]
+            city_result = script_inner_data_json["props"]["pageProps"]["dehydratedState"]["queries"][0] \
+                ["state"]["data"]["data"]["statement"]["city_name"]
+            scraper.logger.info(f"Found district: '{district_result}'")
+            scraper.logger.info(f"Found city: '{city_result}'")
 
-            if idx != -1:
-                district_result = ad_title[idx + len(property_type_result):].strip()
-                scraper.logger.info("District extracted from Ad Title: %s", district_result)
-            else:
-                scraper.logger.warning("Property type not found in Ad Title for district extraction")
-        else:
-            scraper.logger.warning("No property type to extract district from")
 
-        scraper.logger.info("Returning ad title: %s, transaction type: %s, property type: %s, district: %s", ad_title, transaction_type_result, property_type_result, district_result)
+        scraper.logger.info("Returning ad title: %s, transaction type: %s, property type: %s, district: %s",
+                            ad_title, transaction_type_result, property_type_result, district_result)
 
-        return ad_title, transaction_type_result, property_type_result, district_result
+        return ad_title, transaction_type_result, property_type_result, district_result, city_result
     except WebDriverException as e:
         scraper.logger.error("WebDriver exception occurred while extracting Ad Title: %s", e)
         return None
-
