@@ -7,7 +7,7 @@ from BasicSeleniumSetup.functions.separate_location_and_number import separate_l
 import re
 
 
-def get_owner_price(scraper, by, value):
+def get_owner_price(scraper, by, value, currency_to_set):
     if not is_loaded(scraper, by, value):
         scraper.logger.warning(f"Owner price element not loaded: '{by}' - '{value}'")
         return None
@@ -17,7 +17,7 @@ def get_owner_price(scraper, by, value):
         if owner_price_element:
             owner_price = owner_price_element.text
             scraper.logger.info(f"Owner price extracted: '{owner_price}'")
-            return owner_price
+            return owner_price, currency_to_set
         return None
     except WebDriverException as e:
         scraper.logger.error(f"Webdriver exception occurred while extracting owner price: {e}")

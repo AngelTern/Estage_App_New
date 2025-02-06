@@ -10,7 +10,7 @@ import re
 
 
 def choose_property_type(scraper, property_type, by, value, value_text):
-    if not is_loaded(scraper, by, value):
+    if not is_loaded(scraper, by, value, timeout=100):
         scraper.logger.warning(f"Choose property type element not found: '{by}' - '{value}'")
         return
 

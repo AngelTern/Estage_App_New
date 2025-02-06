@@ -10,7 +10,7 @@ import re
 def get_property_details(scraper, by, value, value_space, value_room, value_bedroom, value_floor):
     if not is_loaded(scraper, by, value):
         scraper.logger.warning(f"Property details elements is not loaded: '{by}' - '{value}'")
-        return
+        return (None, None, None, None, None)
 
     try:
         property_details_element = scraper.driver.find_element(by, value)
@@ -38,14 +38,18 @@ def get_property_details(scraper, by, value, value_space, value_room, value_bedr
             if not floor_full:
                 scraper.logger.warning(f"Error while extracting floor from property details")
                 floor_full = "N/A"
-            if floor_full:
+
+            if "/" in floor_full:
                 floor, total_floor = floor_full.split("/")
                 scraper.logger.info(f"Floor: '{floor}'; Total floor count: '{total_floor}'")
+            else:
+                floor = floor_full
+                total_floor = "N/A"
 
             return space, room, bedroom, floor, total_floor
-        return
+
+        return (None, None, None, None, None)
+
     except WebDriverException as e:
         scraper.logger.error(f"Webdriver exception occurred while extracting property details: {e}")
-        return
-
-
+        return (None, None, None, None, None)

@@ -45,7 +45,9 @@ class MyHomeScraper(BasicScraper):
                                        MyHomeScrapeSelectors.OWNER_PRICE_CURRENCY,
                                        MyHomeScrapeSelectors.CURRENCY_CHANGE_BUTTON,
                                        currency_to_set):
-            self.owner_price = get_owner_price(self, By.CSS_SELECTOR, MyHomeScrapeSelectors.OWNER_PRICE)
+            self.owner_price, self.owner_price_currency = get_owner_price(self, By.CSS_SELECTOR,
+                                                                          MyHomeScrapeSelectors.OWNER_PRICE,
+                                                                          currency_to_set)
 
         if click_owner_number_button(self, By.CSS_SELECTOR, MyHomeScrapeSelectors.OWNER_NUMBER_BUTTON):
             self.owner_number = get_owner_number(self, By.CSS_SELECTOR, MyHomeScrapeSelectors.OWNER_NUMBER)
@@ -110,9 +112,9 @@ class MyHomeScraper(BasicScraper):
         }
 
         additional_info = {
-            "სველი წერტილი": self.additional_parameters["სვ.წერტილები"],
-            "მდგომარეობა": self.additional_parameters["მდგომარეობა"],
-            "სტატუსი": self.additional_parameters["სტატუსი"]
+            "სველი წერტილი": self.additional_parameters.get("სვ.წერტილები") or None,
+            "მდგომარეობა": self.additional_parameters.get("მდგომარეობა") or None,
+            "სტატუსი": self.additional_parameters.get("სტატუსი") or None
         }
 
         breadcrumbs = {
@@ -178,7 +180,7 @@ class MyHomeScraper(BasicScraper):
 
 
 if __name__ == '__main__':
-    obj = MyHomeScraper(url="https://www.myhome.ge/pr/19855161/qiravdeba-2-otaxiani-bina-ortachalashi/",
+    obj = MyHomeScraper(url="https://www.myhome.ge/pr/20190203/qiravdeba-3-otaxiani-bina-dighomi-1-9-shi/",
                         headless=False)
     obj.open_page()
     obj.scrape_for_ad_id()

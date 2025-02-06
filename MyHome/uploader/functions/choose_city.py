@@ -1,5 +1,4 @@
 import time
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -13,7 +12,7 @@ import re
 
 
 def choose_city(scraper, by, value, value_select, city_value):
-    if not is_loaded(scraper, by, value):
+    if not is_loaded(scraper, by, value, timeout=100):
         scraper.logger.warning(f"Choose city element not found: '{by}' - '{value}'")
         return
 
@@ -21,18 +20,18 @@ def choose_city(scraper, by, value, value_select, city_value):
         city_input_element = scraper.driver.find_element(by, value)
         scraper.logger.info(f"Choose city input found: '{by}' - '{value}'")
         if city_input_element and click_element(scraper, by, value):
-            time.sleep(5)
             if not send_keys_to_element(scraper, by, value, city_value):
                 return
             scraper.logger.info(f"Successfully typed city")
 
-            if not is_loaded(scraper, by, value_select):
-                scraper.logger.warning(f"Select city element not found: '{by}' - '{value}'")
+            if not is_loaded(scraper, by, value_select, timeout=100):
+                scraper.logger.warning(f"Select city dropdown element not found: '{by}' - '{value}'")
                 return
-            time.sleep(5)
 
-            if click_element(scraper, by, value_select):
-                return True
+            if scraper.driver.find_element(by, value_select).text.strip() == city_value:
+
+                if click_element(scraper, by, value_select):
+                    return True
 
         return
 

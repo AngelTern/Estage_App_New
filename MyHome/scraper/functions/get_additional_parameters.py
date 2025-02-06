@@ -23,7 +23,7 @@ def get_additional_parameters(scraper, by, value, value_param_name, value_param_
             for seperate_element in additional_parameters_elements:
                 parameter_name = seperate_element.find_element(by, value_param_name).text
                 parameter_value = seperate_element.find_element(by, value_param_value).text
-                #scraper.logger.info(f"Extracted: '{parameter_name}' - '{parameter_value}'")
+                print(f"Extracted: '{parameter_name}' - '{parameter_value}'")
                 additional_param_dict[parameter_name] = parameter_value
             return additional_param_dict
         return None

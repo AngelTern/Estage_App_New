@@ -4,7 +4,7 @@ from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 
 
-def custom_wait(scraper, condition_function, timeout=10, poll_frequency=0.5):
+def custom_wait(scraper, condition_function, timeout=100, poll_frequency=0.5):
     """Waits for a condition to be met, polling at a specified interval."""
 
     end_time = time.time() + timeout

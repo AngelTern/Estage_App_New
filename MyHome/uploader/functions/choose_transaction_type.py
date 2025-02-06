@@ -8,8 +8,9 @@ from BasicSeleniumSetup.functions.separate_location_and_number import separate_l
 from BasicSeleniumSetup.functions.click_element import click_element
 import re
 
+
 def choose_transaction_type(scraper, transaction_type, by, value, value_text):
-    if not is_loaded(scraper, by, value):
+    if not is_loaded(scraper, by, value, timeout=100):
         scraper.logger.warning(f"Choose transaction type element not found: '{by}' - '{value}'")
         return
 
@@ -31,4 +32,3 @@ def choose_transaction_type(scraper, transaction_type, by, value, value_text):
     except WebDriverException as e:
         scraper.logger.error(f"WebDriver exception occurred while clicking choose transaction type button: {e}")
         return
-

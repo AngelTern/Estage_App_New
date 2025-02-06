@@ -5,7 +5,7 @@ class MyHomeScrapeSelectors:
     LOCATION = "#__next > div.pt-0.md\:pt-8.pb-8.md\:pb-12.bg-white.md\:bg-\[rgb\(251\,251\,251\)\] > div > div.grid.items-start.grid-cols-12.gap-5.mt-0.md\:mt-3 > div.col-span-12.lg\:col-span-9 > div.px-4.md\:px-6.lg\:px-0 > div.px-0.pt-0.pb-4.mt-4.bg-white.md\:mt-5.md\:border.md\:border-gray-20.rounded-2xl.md\:px-6.md\:pt-5.md\:pb-6 > div.flex.flex-col.items-start > div.flex.items-center.gap-2.mt-2.text-xs.md\:text-sm > span"
     IMAGES = "img.absolute.object-cover.w-full.h-full"
     OWNER_PRICE_CURRENCY = "#__next > div.pt-0.md\:pt-8.pb-8.md\:pb-12.bg-white.md\:bg-\[rgb\(251\,251\,251\)\] > div > div.grid.items-start.grid-cols-12.gap-5.mt-0.md\:mt-3 > div.sticky.hidden.col-span-3.lg\:block > div > div:nth-child(1) > div > div.flex.items-center.justify-start.md\:justify-between > div.flex.text-2xl.md\:text-26.font-tbcx-bold.mt-\[-5px\].md\:mt-0.mr-3.md\:mr-0 > span:nth-child(2)"
-    CURRENCY_CHANGE_BUTTON = "#headlessui-switch-\:rd\:"
+    CURRENCY_CHANGE_BUTTON = "#__next  > div:nth-of-type(2) > div > div:nth-of-type(2) > div:nth-of-type(2) > div > div:nth-of-type(1) > div > div:nth-of-type(1) > div:nth-of-type(2) > button"
     OWNER_PRICE = "#__next > div.pt-0.md\:pt-8.pb-8.md\:pb-12.bg-white.md\:bg-\[rgb\(251\,251\,251\)\] > div > div.grid.items-start.grid-cols-12.gap-5.mt-0.md\:mt-3 > div.sticky.hidden.col-span-3.lg\:block > div > div:nth-child(1) > div > div.flex.items-center.justify-start.md\:justify-between > div.flex.text-2xl.md\:text-26.font-tbcx-bold.mt-\[-5px\].md\:mt-0.mr-3.md\:mr-0 > span:nth-child(1)"
     OWNER_NUMBER_BUTTON = "#__next > div.pt-0.md\:pt-8.pb-8.md\:pb-12.bg-white.md\:bg-\[rgb\(251\,251\,251\)\] > div > div.grid.items-start.grid-cols-12.gap-5.mt-0.md\:mt-3 > div.sticky.hidden.col-span-3.lg\:block > div > div.hidden.p-5.bg-white.border.rounded-2xl.border-gray-20.md\:block > button"
     OWNER_NUMBER = "#__next > div.pt-0.md\:pt-8.pb-8.md\:pb-12.bg-white.md\:bg-\[rgb\(251\,251\,251\)\] > div > div.grid.items-start.grid-cols-12.gap-5.mt-0.md\:mt-3 > div.sticky.hidden.col-span-3.lg\:block > div > div.hidden.p-5.bg-white.border.rounded-2xl.border-gray-20.md\:block > button > span.text-sm"
@@ -23,3 +23,4 @@ class MyHomeScrapeSelectors:
     ADDITONAL_PARAMETER_VALUE = "div.flex > div.flex.flex-col > div"
     FURNITURE_SELECTION = "#__next > div:nth-of-type(2) > div.container > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(6) > div:nth-of-type(1) > div"
     FURNITURE = "div > div > span"
+
