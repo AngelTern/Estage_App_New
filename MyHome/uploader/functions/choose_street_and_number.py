@@ -49,17 +49,14 @@ def choose_street_and_number(scraper, by, value_street_input, value_street_selec
             except Exception as e:
                 scraper.logger.error("Error getting text from street district element: %s", e)
                 continue
-            match = re.search(pattern, street_inner_text)
-            if match:
-                street_district = match.group(1).strip()
-                scraper.logger.info("Extracted street district: %s", street_district)
-                if street_district == district:
-                    time.sleep(0.2)
-                    if not click_element(scraper, by, item):
-                        scraper.logger.error("Could not click select street dropdown")
-                        return
-                    scraper.logger.info("Clicked street dropdown for district: %s", district)
-                    break
+
+            if street_inner_text == street:
+                time.sleep(0.2)
+                if not click_element(scraper, by, item):
+                    scraper.logger.error("Could not click select street dropdown")
+                    return
+                scraper.logger.info("Clicked street dropdown for district: %s", district)
+                break
 
         input_number_element = scraper.driver.find_element(by, value_number)
         if input_number_element and click_element(scraper, by, value_number):

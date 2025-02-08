@@ -7,8 +7,7 @@ from BasicSeleniumSetup.functions.separate_location_and_number import separate_l
 import re
 
 
-def get_additional_parameters(scraper, by, value, value_param_name, value_param_value,
-                              additional_param_dict):
+def get_additional_parameters(scraper, by, value, value_param_name, value_param_value, additional_param_dict):
     if not is_loaded(scraper, by, value):
         scraper.logger.warning(f"Additional parameters element is not loaded: '{by}' - '{value}'")
         return
@@ -17,14 +16,22 @@ def get_additional_parameters(scraper, by, value, value_param_name, value_param_
         additional_parameters_elements = scraper.driver.find_elements(by, value)
 
         if additional_parameters_elements:
-
             scraper.logger.info(
                 f"Additional parameters extracted, parameter count: '{len(additional_parameters_elements)}'")
-            for seperate_element in additional_parameters_elements:
-                parameter_name = seperate_element.find_element(by, value_param_name).text
-                parameter_value = seperate_element.find_element(by, value_param_value).text
-                print(f"Extracted: '{parameter_name}' - '{parameter_value}'")
-                additional_param_dict[parameter_name] = parameter_value
+            for separate_element in additional_parameters_elements:
+                parameter_name = separate_element.find_element(by, value_param_name).text.strip()
+                parameter_value = separate_element.find_element(by, value_param_value).text.strip()
+
+                if parameter_name in additional_param_dict:
+                    if isinstance(additional_param_dict[parameter_name], list):
+                        additional_param_dict[parameter_name].append(parameter_value)
+                    else:
+                        additional_param_dict[parameter_name] = [additional_param_dict[parameter_name], parameter_value]
+                else:
+                    additional_param_dict[parameter_name] = parameter_value
+
+                #print(f"Extracted: '{parameter_name}' - '{parameter_value}'")
+
             return additional_param_dict
         return None
     except WebDriverException as e:

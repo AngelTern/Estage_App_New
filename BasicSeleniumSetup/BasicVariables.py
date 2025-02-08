@@ -13,10 +13,7 @@ class BasicVariables:
         self.owner_number = None
         self.owner_name = None
         self.description = None
-        self.space = None
-        self.rooms = None
-        self.bedroom = None
-        self.floor = None
+        self.property_details = {}
         self.total_floor = None
         self.agency_price = None
         self.transaction_type = None
@@ -25,3 +22,4 @@ class BasicVariables:
         self.district = None
         self.comment = None
         self.paths = {}
+        self.images_path = []

@@ -7,49 +7,56 @@ from BasicSeleniumSetup.functions.separate_location_and_number import separate_l
 import re
 
 
-def get_property_details(scraper, by, value, value_space, value_room, value_bedroom, value_floor):
+def get_property_details(scraper, by, value, value_name, value_value, property_details_dict):
     if not is_loaded(scraper, by, value):
-        scraper.logger.warning(f"Property details elements is not loaded: '{by}' - '{value}'")
-        return (None, None, None, None, None)
+        scraper.logger.warning("Property details elements not loaded: '%s' - '%s'", by, value)
+        return property_details_dict
 
     try:
-        property_details_element = scraper.driver.find_element(by, value)
-        if property_details_element:
-            space = property_details_element.find_element(by, value_space).text
-            scraper.logger.info(f"Space extracted: '{space}'")
-            if not space:
-                scraper.logger.warning(f"Error while extracting space from property details")
-                space = "N/A"
+        elements = scraper.driver.find_elements(by, value)
+        if not elements:
+            scraper.logger.warning("No property detail elements found for '%s' - '%s'", by, value)
+            return property_details_dict
 
-            room = property_details_element.find_element(by, value_room).text
-            scraper.logger.info(f"Room count extracted: '{room}'")
-            if not room:
-                scraper.logger.warning(f"Error while extracting room from property details")
-                room = "N/A"
+        scraper.logger.info("Found %d property detail element(s) for '%s'", len(elements), value)
 
-            bedroom = property_details_element.find_element(by, value_bedroom).text
-            if not bedroom:
-                scraper.logger.warning(f"Error while extracting bedroom from property details")
-                scraper.logger.info(f"Bedroom count extracted: '{bedroom}'")
-                bedroom = "N/A"
+        for detail in elements:
+            try:
+                name_el = detail.find_element(by, value_name)
+                value_el = detail.find_element(by, value_value)
 
-            floor_full = property_details_element.find_element(by, value_floor).text
-            scraper.logger.info(f"Full floor text extracted: '{floor_full}'")
-            if not floor_full:
-                scraper.logger.warning(f"Error while extracting floor from property details")
-                floor_full = "N/A"
+                if not name_el or not value_el:
+                    scraper.logger.warning("Missing name/value in property detail element")
+                    continue
 
-            if "/" in floor_full:
-                floor, total_floor = floor_full.split("/")
-                scraper.logger.info(f"Floor: '{floor}'; Total floor count: '{total_floor}'")
-            else:
-                floor = floor_full
-                total_floor = "N/A"
+                name_text = name_el.text.strip()
+                value_text = value_el.text.strip()
 
-            return space, room, bedroom, floor, total_floor
+                if name_text == "სართული" and "/" in value_text:
+                    parts = [p.strip() for p in value_text.split("/") if p.strip()]
+                    if len(parts) == 2:
+                        floor_text, total_floors_text = parts
+                        property_details_dict["სართული"] = floor_text
+                        property_details_dict["სართულიანობა"] = total_floors_text
+                        scraper.logger.info(
+                            "Extracted detail '%s': '%s' -> Parsed as სართული='%s', სართულიანობა='%s'",
+                            name_text, value_text, floor_text, total_floors_text
+                        )
+                    else:
+                        property_details_dict[name_text] = value_text
+                        scraper.logger.warning(
+                            "Value for '%s' had a slash but could not parse properly: '%s'",
+                            name_text, value_text
+                        )
+                else:
+                    property_details_dict[name_text] = value_text
+                    scraper.logger.info("Extracted detail '%s': '%s'", name_text, value_text)
 
-        return (None, None, None, None, None)
+            except WebDriverException as e:
+                scraper.logger.error("Error while extracting detail from an element: %s", e)
+                continue
+        return property_details_dict
 
     except WebDriverException as e:
-        scraper.logger.error(f"Webdriver exception occurred while extracting property details: {e}")
-        return (None, None, None, None, None)
+        scraper.logger.error("Webdriver exception occurred while extracting property details: %s", e)
+        return property_details_dict

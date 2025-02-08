@@ -15,7 +15,6 @@ def scroll_to_element_centered(scraper, by, value, offset=200, timeout=10, poll_
             element = scraper.driver.find_element(by, value)
             element_desc = f"({by}, '{value}')"
 
-            # Get the current vertical scroll offset.
             old_offset = scraper.driver.execute_script("return window.pageYOffset;")
             scraper.logger.info(f"[scroll_to_element_centered] Current page Y offset: {old_offset}")
 
@@ -34,10 +33,8 @@ def scroll_to_element_centered(scraper, by, value, offset=200, timeout=10, poll_
                 element, offset
             )
 
-            # Pause briefly to allow the scroll animation to complete.
             time.sleep(0.5)
 
-            # Get the new scroll offset.
             new_offset = scraper.driver.execute_script("return window.pageYOffset;")
             scraper.logger.info(f"[scroll_to_element_centered] New page Y offset after scrolling: {new_offset}")
 

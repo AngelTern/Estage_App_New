@@ -23,12 +23,15 @@ import json
 
 
 class MyHomeScraper(BasicScraper):
-    def __init__(self, url, headless=True, log_file="scraper.log"):
-        super().__init__(url, headless, log_file)
+    def __init__(self, url, headless=False, log_file="scraper.log"):
+        super().__init__(url, headless, log_file,)
         self.additional_parameters = {}
         self.furniture = []
 
     def scrape_for_ad_id(self):
+        full_html = self.driver.page_source
+        with open("webpage_source.txt", "w", encoding="utf-8") as f:
+            f.write(full_html)
         self.ad_id = get_ad_id(self, By.CSS_SELECTOR, MyHomeScrapeSelectors.ID)
 
     def main_scrape(self, currency_to_set, agency_price, comment=None):
@@ -56,13 +59,11 @@ class MyHomeScraper(BasicScraper):
 
         self.description = get_description(self, By.CSS_SELECTOR, MyHomeScrapeSelectors.DESCRIPTION)
 
-        self.space, self.rooms, self.bedroom, self.floor, self.total_floor = get_property_details(self,
-                                                                                                  By.CSS_SELECTOR,
-                                                                                                  MyHomeScrapeSelectors.PROPERTY_DETAILS,
-                                                                                                  MyHomeScrapeSelectors.SPACE,
-                                                                                                  MyHomeScrapeSelectors.ROOMS,
-                                                                                                  MyHomeScrapeSelectors.BEDROOM,
-                                                                                                  MyHomeScrapeSelectors.FLOOR)
+        self.property_details = get_property_details(self, By.CSS_SELECTOR,
+                                                     MyHomeScrapeSelectors.PROPERTY_DETAILS,
+                                                     MyHomeScrapeSelectors.PROPERTY_DETAILS_NAME,
+                                                     MyHomeScrapeSelectors.PROPERTY_DETAILS_VALUE,
+                                                     self.property_details)
 
         if click_extend_additional_parameters(self, By.CSS_SELECTOR,
                                               MyHomeScrapeSelectors.ADDITIONAL_PARAMETERS_EXTEND_BUTTON):
@@ -104,11 +105,11 @@ class MyHomeScraper(BasicScraper):
     def save_to_json(self):
 
         property_details = {
-            "საერთო ფართი": self.space,
-            "ოთახი": self.rooms,
-            "საძინებელი": self.bedroom,
-            "სართული": self.floor,
-            "სართულიანობა": self.total_floor,
+            "საერთო ფართი": self.property_details.get("ფართი"),
+            "ოთახი": self.property_details.get("ოთახი"),
+            "საძინებელი": self.property_details.get("საძინებელი"),
+            "სართული": self.property_details.get("სართული"),
+            "სართულიანობა": self.property_details.get("სართულიანობა"),
         }
 
         additional_info = {
@@ -180,8 +181,7 @@ class MyHomeScraper(BasicScraper):
 
 
 if __name__ == '__main__':
-    obj = MyHomeScraper(url="https://www.myhome.ge/pr/20190203/qiravdeba-3-otaxiani-bina-dighomi-1-9-shi/",
-                        headless=False)
+    obj = MyHomeScraper(url="https://www.myhome.ge/pr/20413980/qiravdeba-2-otaxiani-bina-temqaze/")
     obj.open_page()
     obj.scrape_for_ad_id()
     obj.main_scrape("$", "200")

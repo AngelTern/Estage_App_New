@@ -19,8 +19,23 @@ from MyHome.uploader.functions.choose_buil_date import choose_build_date
 from MyHome.uploader.functions.choose_parking import choose_parking
 from MyHome.uploader.functions.choose_hot_water import choose_hot_water
 from MyHome.uploader.functions.choose_balcony import choose_balcony
+from MyHome.uploader.functions.choose_pool import choose_pool
+from MyHome.uploader.functions.choose_entrance import choose_entrance
+from MyHome.uploader.functions.choose_living_room import choose_living_room
+from MyHome.uploader.functions.choose_veranda import choose_veranda
+from MyHome.uploader.functions.choose_storage import choose_storage
+from MyHome.uploader.functions.choose_parameters import choose_parameters
+from MyHome.uploader.functions.choose_benefits import choose_benefits
+from MyHome.uploader.functions.choose_furniture import choose_furniture
+from MyHome.uploader.functions.choose_area_price import choose_area_price
+from MyHome.uploader.functions.input_description import input_description
+from MyHome.uploader.functions.upload_images import upload_images
+from MyHome.uploader.functions.additional_upload_specifications import additional_upload_specifications
+from MyHome.uploader.functions.publish import publish
+from MyHome.uploader.functions.input_name import input_name
 
 """--------------------------------------------------"""
+
 from selenium.webdriver.common.by import By
 import os
 import json
@@ -63,24 +78,35 @@ class MyHomeUploader(BasicScraper):
         choose_city(self, By.CSS_SELECTOR, MyHomeUploadSelectors.INPUT_CITY, MyHomeUploadSelectors.SELECT_CITY,
                     self.data["breadcrumbs"]["ქალაქი"])
 
-        choose_street_and_number(self, By.CSS_SELECTOR,
-                                 MyHomeUploadSelectors.INPUT_STREET,
-                                 MyHomeUploadSelectors.SELECT_STREET,
-                                 MyHomeUploadSelectors.STREET_INNER_DISTRICT,
-                                 MyHomeUploadSelectors.INPUT_STREET_NUMBER,
-                                 self.data["location"],
-                                 self.data["number"],
-                                 self.data["breadcrumbs"]["რაიონი"])
+        if self.data["breadcrumbs"].get("transaction_type") == "ყიდვა":
+            choose_street_and_number(self, By.CSS_SELECTOR,
+                                     MyHomeUploadSelectors.INPUT_STREET_BUY,
+                                     MyHomeUploadSelectors.SELECT_STREET_BUY,
+                                     MyHomeUploadSelectors.STREET_INNER_EXACT_STREET,
+                                     MyHomeUploadSelectors.INPUT_STREET_NUMBER_BUY,
+                                     self.data["location"],
+                                     self.data["number"],
+                                     self.data["breadcrumbs"]["რაიონი"])
+        else:
+            choose_street_and_number(self, By.CSS_SELECTOR,
+                                     MyHomeUploadSelectors.INPUT_STREET,
+                                     MyHomeUploadSelectors.SELECT_STREET,
+                                     MyHomeUploadSelectors.STREET_INNER_EXACT_STREET,
+                                     MyHomeUploadSelectors.INPUT_STREET_NUMBER,
+                                     self.data["location"],
+                                     self.data["number"],
+                                     self.data["breadcrumbs"]["რაიონი"])
 
         choose_number_of_rooms(self, By.CSS_SELECTOR,
                                MyHomeUploadSelectors.ROOM_SELECTION,
                                MyHomeUploadSelectors.ROOM_SELECTION_INNER_TEXT,
                                self.data["property_details"]["ოთახი"])
 
-        choose_number_of_bedrooms(self, By.CSS_SELECTOR,
-                                  MyHomeUploadSelectors.BEDROOM_SELECTION,
-                                  MyHomeUploadSelectors.BEDROOM_SELECTION_INNER_TEXT,
-                                  self.data["property_details"]["საძინებელი"])
+        if self.data["property_details"].get("საძინებელი"):
+            choose_number_of_bedrooms(self, By.CSS_SELECTOR,
+                                      MyHomeUploadSelectors.BEDROOM_SELECTION,
+                                      MyHomeUploadSelectors.BEDROOM_SELECTION_INNER_TEXT,
+                                      self.data["property_details"]["საძინებელი"])
 
         if self.data["additional_parameters"].get("სვ.წერტილები"):
             choose_number_of_washrooms(self, By.CSS_SELECTOR,
@@ -147,8 +173,123 @@ class MyHomeUploader(BasicScraper):
                            MyHomeUploadSelectors.BALCONY_AREA_INPUT,
                            self.data["additional_parameters"].get("აივანი"))
 
-        if self.data["additional_parameters"][""]
-        time.sleep(10000)
+        if self.data["additional_parameters"].get("აუზი"):
+            choose_pool(self, By.CSS_SELECTOR,
+                        MyHomeUploadSelectors.POOL_INPUT,
+                        MyHomeUploadSelectors.POOL_SELECT,
+                        MyHomeUploadSelectors.POOL_CLICK,
+                        self.data["additional_parameters"]["აუზი"])
+
+        if self.data["additional_parameters"].get("მისაღები ოთახი"):
+            choose_entrance(self, By.CSS_SELECTOR,
+                            MyHomeUploadSelectors.ENTRANCE_INPUT,
+                            MyHomeUploadSelectors.ENTRANCE_SELECT,
+                            MyHomeUploadSelectors.ENTRANCE_CLICK,
+                            self.data["additional_parameters"].get("მისაღები ოთახი"),
+                            self.data["additional_parameters"].get("მისაღები"),)
+
+        if self.data["additional_parameters"].get("ლოჯია"):
+            choose_living_room(self, By.CSS_SELECTOR,
+                               MyHomeUploadSelectors.LIVING_ROOM_CLICK,
+                               self.data["additional_parameters"].get("ლოჯია"))
+
+        if self.data["additional_parameters"].get("ვერანდა"):
+            choose_veranda(self, By.CSS_SELECTOR,
+                           MyHomeUploadSelectors.VERANDA_CLICK,
+                           self.data["additional_parameters"].get("ვერანდა"))
+
+        if self.data["additional_parameters"].get("სათავსო"):
+            choose_storage(self, By.CSS_SELECTOR,
+                           MyHomeUploadSelectors.STORAGE_INPUT,
+                           MyHomeUploadSelectors.STORAGE_SELECT,
+                           MyHomeUploadSelectors.STORAGE_SPACE,
+                           MyHomeUploadSelectors.STORAGE_CLICK,
+                           self.data["additional_parameters"].get("სათავსო"))
+
+        choose_parameters(self, By.CSS_SELECTOR,
+                          MyHomeUploadSelectors.PARAMETERS_BUTTON,
+                          MyHomeUploadSelectors.PARAMETERS_BUTTON_TEXT,
+                          self.data["additional_parameters"])
+
+        choose_benefits(self, By.CSS_SELECTOR,
+                        MyHomeUploadSelectors.BENEFITS_BUTTON,
+                        MyHomeUploadSelectors.BENEFITS_TEXT,
+                        self.data["additional_parameters"])
+
+        choose_furniture(self, By.CSS_SELECTOR,
+                         MyHomeUploadSelectors.FURNITURE_BUTTON,
+                         MyHomeUploadSelectors.FURNITURE_TEXT,
+                         self.data["furniture"])
+
+        choose_area_price(self, By.CSS_SELECTOR,
+                          MyHomeUploadSelectors.AREA_INPUT,
+                          MyHomeUploadSelectors.PRICE_INPUT,
+                          MyHomeUploadSelectors.CURRENCY_BUTTON_GEL,
+                          MyHomeUploadSelectors.CURRENCY_BUTTON_USD,
+                          self.data["property_details"].get("საერთო ფართი"),
+                          self.data["owner_price"],
+                          self.data["currency"])
+
+        input_name(self, By.CSS_SELECTOR,
+                   MyHomeUploadSelectors.NAME_INPUT,
+                   self.myhome_authentication_data["MyHome"]["name"])
+
+        input_description(self, By.CSS_SELECTOR,
+                          MyHomeUploadSelectors.DESCRIPTION_INPUT,
+                          self.data["description"])
+
+        upload_images(self, By.CSS_SELECTOR,
+                      MyHomeUploadSelectors.IMAGES_INPUT,
+                      MyHomeUploadSelectors.IMAGES_INPUT_AFTER,
+                      MyHomeUploadSelectors.IMAGES_DIV,
+                      self.images_path)
+        time.sleep(0.5)
+
+
+
+    def additional_upload(self, livo, livo_vip, livo_vip_time,
+                          livo_facebook, livo_facebook_time,
+                          myhome_supervip, myhome_supervip_time,
+                          myhome_vipplus, myhome_vipplus_time,
+                          myhome_vip, myhome_vip_time,
+                          add_color, add_color_time,
+                          automate, automate_time_day, automate_time_hour):
+
+        additional_upload_specifications(self, By.CSS_SELECTOR,
+                                         MyHomeUploadSelectors.VALUE_LIVO, livo,
+                                         MyHomeUploadSelectors.VALUE_LIVO_VIP,
+                                         MyHomeUploadSelectors.VALUE_LIVO_VIP_INPUT,
+                                         MyHomeUploadSelectors.VALUE_LIVO_VIP_SELECT, livo_vip, livo_vip_time,
+                                         MyHomeUploadSelectors.VALUE_LIVO_FACEBOOK,
+                                         MyHomeUploadSelectors.VALUE_LIVO_FACEBOOK_INPUT,
+                                         MyHomeUploadSelectors.VALUE_LIVO_FACEBOOK_SELECT, livo_facebook,
+                                         livo_facebook_time,
+                                         MyHomeUploadSelectors.VALUE_MYHOME_SUPER_VIP,
+                                         MyHomeUploadSelectors.VALUE_MYHOME_SUPER_VIP_INPUT,
+                                         MyHomeUploadSelectors.VALUE_MYHOME_SUPER_VIP_SELECT, myhome_supervip,
+                                         myhome_supervip_time,
+                                         MyHomeUploadSelectors.VALUE_MYHOME_VIP_PLUS,
+                                         MyHomeUploadSelectors.VALUE_MYHOME_VIP_PLUS_INPUT,
+                                         MyHomeUploadSelectors.VALUE_MYHOME_VIP_PLUS_SELECT, myhome_vipplus,
+                                         myhome_vipplus_time,
+                                         MyHomeUploadSelectors.VALUE_MYHOME_VIP,
+                                         MyHomeUploadSelectors.VALUE_MYHOME_VIP_INPUT,
+                                         MyHomeUploadSelectors.VALUE_MYHOME_VIP_SELECT, myhome_vip, myhome_vip_time,
+                                         MyHomeUploadSelectors.VALUE_ADD_COLOR,
+                                         MyHomeUploadSelectors.VALUE_ADD_COLOR_INPUT,
+                                         MyHomeUploadSelectors.VALUE_ADD_COLOR_SELECT, add_color, add_color_time,
+                                         MyHomeUploadSelectors.VALUE_AUTOMATE,
+                                         MyHomeUploadSelectors.VALUE_AUTOMATE_TIME_DAY_INPUT,
+                                         MyHomeUploadSelectors.VALUE_AUTOMATE_TIME_DAY_SELECT,
+                                         MyHomeUploadSelectors.VALUE_AUTOMATE_TIME_HOUR_INPUT,
+                                         MyHomeUploadSelectors.VALUE_AUTOMATE_TIME_HOUR_SELECT, automate,
+                                         automate_time_day, automate_time_hour)
+
+    def finish_upload(self):
+        time.sleep(5)
+        publish(self, By.CSS_SELECTOR,
+                MyHomeUploadSelectors.PUBLISH_BUTTON)
+        time.sleep(5)
 
     def load_data_json(self, ad_id):
         self.ad_id = ad_id
@@ -172,12 +313,56 @@ class MyHomeUploader(BasicScraper):
         except UnicodeError as e:
             self.logger.error("%s Encoding error while reading the file: %s", self.ad_id, e)
 
+    def load_image_paths(self, ad_id):
+        base_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "data")
+        )
+        directory_path = os.path.join(base_path, ad_id)
+        image_folder_path = os.path.join(directory_path, "images")
+
+        self.images_path = []
+
+        if not os.path.exists(image_folder_path):
+            self.logger.warning(f"No image folder found at: {image_folder_path}")
+            return
+
+        for file_name in os.listdir(image_folder_path):
+            if file_name.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
+                full_path = os.path.join(image_folder_path, file_name)
+                self.images_path.append(full_path)
+
+        self.logger.info(
+            f"Loaded {len(self.images_path)} image paths for ad_id: {ad_id}"
+        )
+
+
+
 
 if __name__ == "__main__":
     obj = MyHomeUploader("https://statements.myhome.ge/ka/statement/create?referrer=myhome", False)
     obj.load_data_json("19855161")
+    obj.load_image_paths("19855161")
     obj.primary_authenticate()
     obj.open_page()
     obj.main_upload()
+    """obj.additional_upload(
+        livo=True,
+        livo_vip=False,
+        livo_vip_time=None,
+        livo_facebook=False,
+        livo_facebook_time=None,
+        myhome_supervip=True,
+        myhome_supervip_time="1 დღე",
+        myhome_vipplus=True,
+        myhome_vipplus_time="1 დღე",
+        myhome_vip=True,
+        myhome_vip_time="1 დღე",
+        add_color=True,
+        add_color_time="1 დღე",
+        automate=True,
+        automate_time_day="1 დღე",
+        automate_time_hour="00:00 საათი"
+    )"""
+    obj.finish_upload()
     obj.close_browser()
     obj.save_to_excel()
