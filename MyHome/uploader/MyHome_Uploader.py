@@ -1,3 +1,16 @@
+import sys
+import os
+import json
+import time
+from selenium.webdriver.common.by import By
+
+
+def get_base_dir():
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+
+
 from BasicSeleniumSetup.BasicSetup import BasicScraper
 from MyHome.uploader.MyHome_Upload_Selectors import MyHomeUploadSelectors
 from MyHome.uploader.functions.authentication_process import authenticate
@@ -30,17 +43,11 @@ from MyHome.uploader.functions.choose_furniture import choose_furniture
 from MyHome.uploader.functions.choose_area_price import choose_area_price
 from MyHome.uploader.functions.input_description import input_description
 from MyHome.uploader.functions.upload_images import upload_images
-from MyHome.uploader.functions.additional_upload_specifications import additional_upload_specifications
 from MyHome.uploader.functions.publish import publish
 from MyHome.uploader.functions.input_name import input_name
-
-"""--------------------------------------------------"""
-
-from selenium.webdriver.common.by import By
-import os
-import json
-import time
-
+from MyHome.uploader.functions.temporary import additional_upload_specifications
+from MyHome.uploader.functions.pay import pay
+from MyHome.uploader.functions.collect_url import collect_url
 
 class MyHomeUploader(BasicScraper):
     def __init__(self, url, headless=True, log_file="scraper.log"):
@@ -49,18 +56,19 @@ class MyHomeUploader(BasicScraper):
         self.myhome_authentication_data = None
 
     def primary_authenticate(self):
-        base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "confidential"))
+        base_path = os.path.join(get_base_dir(), "confidential")
         print(base_path)
         json_file_path = os.path.join(base_path, "config.json")
         print(json_file_path)
         try:
             with open(json_file_path, "r", encoding="utf-8") as f:
                 self.myhome_authentication_data = json.load(f)
+                print(self.myhome_authentication_data)
                 return self.myhome_authentication_data
         except FileNotFoundError:
             return
 
-    def main_upload(self):
+    def main_upload(self, upload_description):
         authenticate(self, By.CSS_SELECTOR, MyHomeUploadSelectors.AUTHENTICATION_BUTTON,
                      MyHomeUploadSelectors.EMAIL_INPUT_FIELD, MyHomeUploadSelectors.PASSWORD_INPUT_FIELD,
                      MyHomeUploadSelectors.CONFIRM_AUTHENTICATION_BUTTON,
@@ -75,27 +83,28 @@ class MyHomeUploader(BasicScraper):
                                 MyHomeUploadSelectors.TRANSACTION_TYPE_BUTTONS,
                                 MyHomeUploadSelectors.TRANSACTION_TYPE_TEXT)
 
-        choose_city(self, By.CSS_SELECTOR, MyHomeUploadSelectors.INPUT_CITY, MyHomeUploadSelectors.SELECT_CITY,
-                    self.data["breadcrumbs"]["ქალაქი"])
+        if self.data["breadcrumbs"].get("transaction_type") == "ყიდვა" or self.data["breadcrumbs"].get("transaction_type") == "იყიდება":
+            choose_city(self, By.CSS_SELECTOR, MyHomeUploadSelectors.INPUT_CITY_BUY, MyHomeUploadSelectors.SELECT_CITY_BUY,
+                        self.data["breadcrumbs"]["ქალაქი"])
 
-        if self.data["breadcrumbs"].get("transaction_type") == "ყიდვა":
             choose_street_and_number(self, By.CSS_SELECTOR,
                                      MyHomeUploadSelectors.INPUT_STREET_BUY,
                                      MyHomeUploadSelectors.SELECT_STREET_BUY,
                                      MyHomeUploadSelectors.STREET_INNER_EXACT_STREET,
                                      MyHomeUploadSelectors.INPUT_STREET_NUMBER_BUY,
                                      self.data["location"],
-                                     self.data["number"],
-                                     self.data["breadcrumbs"]["რაიონი"])
+                                     self.data["number"])
         else:
+            choose_city(self, By.CSS_SELECTOR, MyHomeUploadSelectors.INPUT_CITY, MyHomeUploadSelectors.SELECT_CITY,
+                        self.data["breadcrumbs"]["ქალაქი"])
+
             choose_street_and_number(self, By.CSS_SELECTOR,
                                      MyHomeUploadSelectors.INPUT_STREET,
                                      MyHomeUploadSelectors.SELECT_STREET,
                                      MyHomeUploadSelectors.STREET_INNER_EXACT_STREET,
                                      MyHomeUploadSelectors.INPUT_STREET_NUMBER,
                                      self.data["location"],
-                                     self.data["number"],
-                                     self.data["breadcrumbs"]["რაიონი"])
+                                     self.data["number"])
 
         choose_number_of_rooms(self, By.CSS_SELECTOR,
                                MyHomeUploadSelectors.ROOM_SELECTION,
@@ -123,7 +132,7 @@ class MyHomeUploader(BasicScraper):
         choose_status(self, By.CSS_SELECTOR,
                       MyHomeUploadSelectors.STATUS_INPUT,
                       MyHomeUploadSelectors.STATUS_SELECT,
-                      self.data["additional_info"]["სტატუსი"])
+                      self.data["additional_parameters"]["სტატუსი"])
 
         if self.data["additional_parameters"].get("აშენების წელი"):
             choose_build_date(self, By.CSS_SELECTOR,
@@ -135,7 +144,7 @@ class MyHomeUploader(BasicScraper):
             choose_state(self, By.CSS_SELECTOR,
                          MyHomeUploadSelectors.STATE_INPUT,
                          MyHomeUploadSelectors.STATE_SELECT,
-                         self.data["additional_info"].get("მდგომარეობა"))
+                         self.data["additional_parameters"].get("მდგომარეობა"))
 
         choose_project(self, By.CSS_SELECTOR,
                        MyHomeUploadSelectors.PROJECT_INPUT,
@@ -186,7 +195,7 @@ class MyHomeUploader(BasicScraper):
                             MyHomeUploadSelectors.ENTRANCE_SELECT,
                             MyHomeUploadSelectors.ENTRANCE_CLICK,
                             self.data["additional_parameters"].get("მისაღები ოთახი"),
-                            self.data["additional_parameters"].get("მისაღები"),)
+                            self.data["additional_parameters"].get("მისაღები"), )
 
         if self.data["additional_parameters"].get("ლოჯია"):
             choose_living_room(self, By.CSS_SELECTOR,
@@ -227,27 +236,36 @@ class MyHomeUploader(BasicScraper):
                           MyHomeUploadSelectors.CURRENCY_BUTTON_GEL,
                           MyHomeUploadSelectors.CURRENCY_BUTTON_USD,
                           self.data["property_details"].get("საერთო ფართი"),
-                          self.data["owner_price"],
+                          self.data["agency_price"],
                           self.data["currency"])
 
         input_name(self, By.CSS_SELECTOR,
                    MyHomeUploadSelectors.NAME_INPUT,
-                   self.myhome_authentication_data["MyHome"]["name"])
+                   self.myhome_authentication_data["Estage"]["name"])
 
-        input_description(self, By.CSS_SELECTOR,
-                          MyHomeUploadSelectors.DESCRIPTION_INPUT,
-                          self.data["description"])
+        if upload_description:
+            input_description(self, By.CSS_SELECTOR,
+                              MyHomeUploadSelectors.DESCRIPTION_INPUT,
+                              self.data["description"])
 
         upload_images(self, By.CSS_SELECTOR,
                       MyHomeUploadSelectors.IMAGES_INPUT,
                       MyHomeUploadSelectors.IMAGES_INPUT_AFTER,
                       MyHomeUploadSelectors.IMAGES_DIV,
                       self.images_path)
+        #time.sleep(40)
+
+        additional_upload_specifications(self, By.CSS_SELECTOR,
+                                         MyHomeUploadSelectors.VALUE_LIVO,
+                                         MyHomeUploadSelectors.VALUE_MYHOME_SUPER_VIP,
+                                         MyHomeUploadSelectors.VALUE_MYHOME_VIP_PLUS,
+                                         MyHomeUploadSelectors.VALUE_MYHOME_VIP,
+                                         MyHomeUploadSelectors.VALUE_ADD_COLOR,
+                                         MyHomeUploadSelectors.VALUE_AUTOMATE)
+
         time.sleep(0.5)
 
-
-
-    def additional_upload(self, livo, livo_vip, livo_vip_time,
+    '''def additional_upload(self, livo, livo_vip, livo_vip_time,
                           livo_facebook, livo_facebook_time,
                           myhome_supervip, myhome_supervip_time,
                           myhome_vipplus, myhome_vipplus_time,
@@ -283,17 +301,28 @@ class MyHomeUploader(BasicScraper):
                                          MyHomeUploadSelectors.VALUE_AUTOMATE_TIME_DAY_SELECT,
                                          MyHomeUploadSelectors.VALUE_AUTOMATE_TIME_HOUR_INPUT,
                                          MyHomeUploadSelectors.VALUE_AUTOMATE_TIME_HOUR_SELECT, automate,
-                                         automate_time_day, automate_time_hour)
+                                         automate_time_day, automate_time_hour)'''
 
     def finish_upload(self):
-        time.sleep(5)
+        time.sleep(2)
         publish(self, By.CSS_SELECTOR,
                 MyHomeUploadSelectors.PUBLISH_BUTTON)
-        time.sleep(5)
+        time.sleep(3)
+        pay(self, By.CSS_SELECTOR,
+            MyHomeUploadSelectors.CARD_BALANCE_BUTTON,
+            MyHomeUploadSelectors.BALANCE_BUTTON,
+            MyHomeUploadSelectors.PAY_BUTTON)
+        time.sleep(2)
+        self.new_url = collect_url(self, By.XPATH,
+                                   MyHomeUploadSelectors.MY_GANCXADEBEBI,
+                                   MyHomeUploadSelectors.GANAXLEBIS_TARIGI_INPUT,
+                                   MyHomeUploadSelectors.GANAXLEBIS_TARIGI_SELECT,
+                                   MyHomeUploadSelectors.AXALIS_URL)
+        return self.new_url
 
     def load_data_json(self, ad_id):
         self.ad_id = ad_id
-        base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data"))
+        base_path = os.path.join(get_base_dir(), "data")
         directory_path = os.path.join(base_path, self.ad_id)
         json_file_path = os.path.join(directory_path, f"{self.ad_id}.json")
         self.logger.info("%s json file located at: %s\nLoading %s.json file", self.ad_id, json_file_path, self.ad_id)
@@ -314,9 +343,7 @@ class MyHomeUploader(BasicScraper):
             self.logger.error("%s Encoding error while reading the file: %s", self.ad_id, e)
 
     def load_image_paths(self, ad_id):
-        base_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "data")
-        )
+        base_path = os.path.join(get_base_dir(), "data")
         directory_path = os.path.join(base_path, ad_id)
         image_folder_path = os.path.join(directory_path, "images")
 
@@ -336,15 +363,13 @@ class MyHomeUploader(BasicScraper):
         )
 
 
-
-
 if __name__ == "__main__":
     obj = MyHomeUploader("https://statements.myhome.ge/ka/statement/create?referrer=myhome", False)
-    obj.load_data_json("19855161")
-    obj.load_image_paths("19855161")
+    obj.load_data_json("31141042")
+    obj.load_image_paths("31141042")
     obj.primary_authenticate()
     obj.open_page()
-    obj.main_upload()
+    obj.main_upload(True)
     """obj.additional_upload(
         livo=True,
         livo_vip=False,
@@ -363,6 +388,6 @@ if __name__ == "__main__":
         automate_time_day="1 დღე",
         automate_time_hour="00:00 საათი"
     )"""
-    obj.finish_upload()
+    final_url = obj.finish_upload()
     obj.close_browser()
-    obj.save_to_excel()
+    print(obj.new_url)

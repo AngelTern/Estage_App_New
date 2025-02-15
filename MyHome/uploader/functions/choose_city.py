@@ -12,7 +12,7 @@ import re
 
 
 def choose_city(scraper, by, value, value_select, city_value):
-    if not is_loaded(scraper, by, value, timeout=100):
+    if not is_loaded(scraper, by, value, timeout=10):
         scraper.logger.warning(f"Choose city element not found: '{by}' - '{value}'")
         return
 

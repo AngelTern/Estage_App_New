@@ -1,3 +1,16 @@
+import sys
+import os
+import time
+
+
+def get_base_dir():
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+
 from BasicSeleniumSetup.BasicSetup import BasicScraper
 from BasicSeleniumSetup.functions.download_images import download_images
 from MyHome.scraper.MyHome_Scrape_Selectors import MyHomeScrapeSelectors
@@ -24,14 +37,11 @@ import json
 
 class MyHomeScraper(BasicScraper):
     def __init__(self, url, headless=False, log_file="scraper.log"):
-        super().__init__(url, headless, log_file,)
+        super().__init__(url, headless, log_file, )
         self.additional_parameters = {}
         self.furniture = []
 
     def scrape_for_ad_id(self):
-        full_html = self.driver.page_source
-        with open("webpage_source.txt", "w", encoding="utf-8") as f:
-            f.write(full_html)
         self.ad_id = get_ad_id(self, By.CSS_SELECTOR, MyHomeScrapeSelectors.ID)
 
     def main_scrape(self, currency_to_set, agency_price, comment=None):
@@ -112,9 +122,17 @@ class MyHomeScraper(BasicScraper):
             "სართულიანობა": self.property_details.get("სართულიანობა"),
         }
 
+        state = self.additional_parameters.get("მდგომარეობა")
+        if state == "ძველი გარემონტებული":
+            state = "ძველი რემონტით"
+        elif state == "ახალი გარემონტებული":
+            state = "ახალი რემონტით"
+        elif state == "ახალი გარემონტებული":
+            state = "გარემონტებული"
+
         additional_info = {
             "სველი წერტილი": self.additional_parameters.get("სვ.წერტილები") or None,
-            "მდგომარეობა": self.additional_parameters.get("მდგომარეობა") or None,
+            "მდგომარეობა": state,
             "სტატუსი": self.additional_parameters.get("სტატუსი") or None
         }
 
@@ -135,18 +153,18 @@ class MyHomeScraper(BasicScraper):
             "ლიფტი": "კი" if "ლიფტი" in self.additional_parameters.keys() else "არა",
             "მაცივარი": "კი" if "მაცივარი" in self.furniture else "არა",
             "ავეჯი": "კი" if "ავეჯი" in self.furniture else "არა",
-            "გარაჟი": "კი" if "გარაჟი" in self.description else "არა",
-            "მინა-პაკეტი": "კი" if "მინა-პაკეტი" in self.description else "არა",
+            "გარაჟი": "კი" if self.description and "გარაჟი" in self.description else "არა",
+            "მინა-პაკეტი": "კი" if self.description and "მინა-პაკეტი" in self.description else "არა",
             "ცენტ. გათბობა": "კი" if "გათბობა" in self.additional_parameters.keys() and
                                      "ცენტრალური გათბობა" in self.additional_parameters["გათბობა"] else "არა",
             "ცხელი წყალი": "კი" if "ცხელი წყალი" in self.additional_parameters.keys() else "არა",
             "ინტერნეტი": "კი" if "ინტერნეტი" in self.additional_parameters.keys() else "არა",
-            "რკინის კარი": "კი" if "რკინის კარი" in self.description else "არა",
+            "რკინის კარი": "კი" if self.description and "რკინის კარი" in self.description else "არა",
             "ბუნებრივი აირი": "კი" if "ბუნ. აირი" in self.additional_parameters.keys() else "არა",
             "სიგნალიზაცია": "კი" if "სიგნალიზაცია" in self.additional_parameters.keys() else "არა",
             "სათავსო": "კი" if "სათავსო" in self.additional_parameters.keys() else "არა",
             "ტელეფონი": "კი" if "ტელეფონი" in self.additional_parameters.keys() else "არა",
-            "ტელევიზორი": "კი" if "ტელევიზორი" in self.description or
+            "ტელევიზორი": "კი" if self.description and "ტელევიზორი" in self.description or
                                   "ტელევიზია" in self.additional_parameters.keys() else "არა",
             "სარეცხი მანქანა": "კი" if "სარეცხი მანქანა" in self.furniture else "არა"
         }
@@ -163,7 +181,7 @@ class MyHomeScraper(BasicScraper):
             "agency_price": self.agency_price,
             "phone_number": self.owner_number,
             "name": self.owner_name,
-            "description": self.description,
+            "description": self.description if self.description else "",
             "comment": self.comment,
             "property_details": property_details,
             "additional_info": additional_info,
@@ -177,14 +195,15 @@ class MyHomeScraper(BasicScraper):
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
-        return True
+        return self.ad_id
 
 
 if __name__ == '__main__':
-    obj = MyHomeScraper(url="https://www.myhome.ge/pr/20413980/qiravdeba-2-otaxiani-bina-temqaze/")
+    obj = MyHomeScraper(url="https://www.myhome.ge/pr/20445069/qiravdeba-2-otaxiani-bina-temqaze/")
     obj.open_page()
     obj.scrape_for_ad_id()
     obj.main_scrape("$", "200")
     obj.get_images()
     obj.close_browser()
+
     obj.save_to_json()

@@ -1,10 +1,12 @@
 import time
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 from BasicSeleniumSetup.functions.is_loaded import is_loaded
 from BasicSeleniumSetup.functions.click_element import click_element
 from BasicSeleniumSetup.functions.send_keys_to_element import send_keys_to_element
 from BasicSeleniumSetup.functions.scroll_to_element import scroll_to_element_centered
 import re
+
 
 def additional_upload_specifications(scraper, by,
                                      value_myhome_supervip, value_myhome_supervip_input, value_myhome_supervip_select,
@@ -49,14 +51,34 @@ def additional_upload_specifications(scraper, by,
             return False
 
     livo_button_element = scraper.driver.find_element(by, value_livo)
-    livo_data_state = livo_button_element.get_attribute("data-state")
+    ''' not livo_button_element:
+        print("NO BUTTON HELP")'''
+    livo_data_state = scraper.driver.execute_script("return arguments[0].getAttribute('data-state');", livo_button_element)
+    print(livo_data_state)
+    '''livo_area_state = livo_button_element.get_attribute("aria-checked")'''
 
     if livo_data_state != "checked":
+        click_element(scraper, by, livo_button_element)
+        time.sleep(0.4)
+
+    '''try:
+        child_span = livo_button_element.find_element(By.TAG_NAME, "span")
+        print(child_span)
+        print("Span exists:", True)
+    except NoSuchElementException:
+        child_span = None
+        print("Span exists:", False)'''
+
+    '''print(livo_data_state)
+    print(livo_area_state)'''
+
+    '''if child_span is None:
         try:
             click_element(scraper, by, livo_button_element)
+            print("clicked button")
             time.sleep(0.5)
         except Exception as e:
-            scraper.logger.error(f"Failed to click Livo button: {str(e)}")
+            scraper.logger.error(f"Failed to click Livo button: {str(e)}")'''
 
     if myhome_supervip:
         select_option(value_myhome_supervip, value_myhome_supervip_input, value_myhome_supervip_select,

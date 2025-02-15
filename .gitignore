@@ -17,3 +17,17 @@
 # Ignore Confidential data folder
 
 confidential/
+
+design_template/
+
+*.ui
+
+static/
+
+*.spec
+
+dist/
+
+build/
+
+*.txt
