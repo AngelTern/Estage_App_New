@@ -1152,7 +1152,7 @@ class Ui_Form(object):
         self.lbl_myhome_user.setText(_translate("Form", "MYHOME USER"))
         self.lbl_myhome_email.setText(_translate("Form", "whateverwhatever@mail.com"))
         self.btn_change_myhome_profile.setText(_translate("Form", "შეცვლა"))
-        self.lbl_currency.setText(_translate("Form", "아이რჩიე ვალუტა"))
+        self.lbl_currency.setText(_translate("Form", "აირჩიე ვალუტა"))
         self.btn_usd.setText(_translate("Form", "USD"))
         self.btn_gel.setText(_translate("Form", "GEL"))
         self.lbl_desc_off.setText(_translate("Form", "არა"))
@@ -1180,8 +1180,8 @@ class Ui_Form(object):
         self.lbl_myhome_name.setText(_translate("Form", "სახელი"))
         self.btn_cancel_ssge_profile.setText(_translate("Form", "დაბრუნება"))
         self.btn_save_ssge_profile.setText(_translate("Form", "დაადასტურე"))
-        self.lbl_ssge_password.setText(_translate("Form", "შენი SS.Gე (PASSWORD)"))
-        self.lbl_ssge_user.setText(_translate("Form", "შენი SS.Gე (USERNAME)"))
+        self.lbl_ssge_password.setText(_translate("Form", "შენი SS.GE (PASSWORD)"))
+        self.lbl_ssge_user.setText(_translate("Form", "შენი SS.GE (USERNAME)"))
         self.label.setText(_translate("Form", "სახელი"))
         self.load_config_emails()
         self.btn_save_myhome_profile.clicked.connect(self.save_myhome_profile)
@@ -1284,9 +1284,16 @@ class Ui_Form(object):
     def open_excel_file(self):
         try:
             excel_path = os.path.join(get_base_dir(), "data", "realestate.xlsx")
-            subprocess.call(['open', excel_path])
-        except Exception:
-            pass
+
+            if sys.platform.startswith("darwin"):
+                subprocess.call(["open", excel_path])
+            elif sys.platform.startswith("win"):
+                os.startfile(excel_path)
+            else:
+                subprocess.call(["xdg-open", excel_path])
+
+        except Exception as e:
+            print(f"Error opening file: {e}")
 
     def on_upload_clicked(self):
         if hasattr(self, 'worker') and self.worker is not None and self.worker.isRunning():
@@ -1390,7 +1397,7 @@ class Ui_Form(object):
                                                       "QPushButton:pressed {\n"
                                                       "    background-color: #1E7E34;\n"
                                                       "}")
-            self.lbl_single_upload.setText("ერთეული ატვირთვა (SS.Gე)")
+            self.lbl_single_upload.setText("ერთეული ატვირთვა (SS.GE)")
             self.lbl_ss_app.setText("ორივე")
             self.lbl_ss_app.setStyleSheet("QLabel { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; color: black; text-align: center; margin: 0; }")
             self.btn_use_ss_app.setStyleSheet("QPushButton {\n"
