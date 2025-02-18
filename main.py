@@ -1,3 +1,4 @@
+import subprocess
 import sys
 import os
 import json
@@ -1151,7 +1152,7 @@ class Ui_Form(object):
         self.lbl_myhome_user.setText(_translate("Form", "MYHOME USER"))
         self.lbl_myhome_email.setText(_translate("Form", "whateverwhatever@mail.com"))
         self.btn_change_myhome_profile.setText(_translate("Form", "შეცვლა"))
-        self.lbl_currency.setText(_translate("Form", "აირჩიე ვალუტა"))
+        self.lbl_currency.setText(_translate("Form", "아이რჩიე ვალუტა"))
         self.btn_usd.setText(_translate("Form", "USD"))
         self.btn_gel.setText(_translate("Form", "GEL"))
         self.lbl_desc_off.setText(_translate("Form", "არა"))
@@ -1243,6 +1244,17 @@ class Ui_Form(object):
         except Exception:
             pass
 
+    @staticmethod
+    def is_valid_email(email):
+        email_regex = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+        return re.match(email_regex, email) is not None
+
+    @staticmethod
+    def is_valid_ssge_credential(value):
+        email_pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+        phone_pattern = r"^[+]?\d{5,15}$"
+        return re.match(email_pattern, value) or re.match(phone_pattern, value)
+
     def save_ssge_profile(self):
         try:
             config_path = os.path.join(get_base_dir(), "confidential", "config.json")
@@ -1251,8 +1263,8 @@ class Ui_Form(object):
             ssge_user = self.led_ssge_user.text().strip()
             ssge_password = self.led_ssge_password.text().strip()
             estage_name = self.led_ssge_name.text().strip()
-            if not self.is_valid_email(ssge_user):
-                QMessageBox.warning(None, "Invalid Email", "Please enter a valid email address for SSGE.")
+            if not self.is_valid_ssge_credential(ssge_user):
+                QMessageBox.warning(None, "Invalid Input", "Please enter a valid email or phone number for SSGE.")
                 return
             if not estage_name:
                 QMessageBox.warning(None, "Invalid Name", "Name field cannot be empty.")
@@ -1269,15 +1281,10 @@ class Ui_Form(object):
         except Exception:
             pass
 
-    @staticmethod
-    def is_valid_email(email):
-        email_regex = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
-        return re.match(email_regex, email) is not None
-
     def open_excel_file(self):
         try:
             excel_path = os.path.join(get_base_dir(), "data", "realestate.xlsx")
-            os.startfile(excel_path)
+            subprocess.call(['open', excel_path])
         except Exception:
             pass
 
